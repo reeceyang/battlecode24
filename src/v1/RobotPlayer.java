@@ -83,75 +83,7 @@ public strictfp class RobotPlayer {
                     MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
                     if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
                 } else {
-                    Direction randomDir = directions[rng.nextInt(directions.length)];
-                    switch (macroState) {
-
-                        case SETUP:
-                            // Move and attack randomly if no objective.
-                            if (rc.canMove(randomDir)) {
-                                rc.move(randomDir);
-                            }
-                            break;
-                        case BATTLE:
-                            RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
-                            FlagInfo[] nearbyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
-                            switch (state) {
-                                case SCOUT:
-                                    if (enemyRobots.length != 0) {
-                                        state = State.COMBAT;
-                                    } else if (nearbyFlags.length != 0) {
-                                        MapLocation flagLoc = nearbyFlags[0].getLocation();
-                                        Pathing.moveTowards(rc, flagLoc);
-                                        state = State.FLAG_SPOTTED;
-                                    } else {
-                                        // Move and attack randomly if no objective.
-                                        if (rc.canMove(randomDir)) {
-                                            rc.move(randomDir);
-                                        }
-                                    }
-                                    break;
-                                case COMBAT:
-                                    if (enemyRobots.length != 0) {
-                                        // Save an array of locations with enemy robots in them for future use.
-                                        MapLocation enemyLoc = enemyRobots[0].getLocation();
-                                        if (rc.canAttack(enemyLoc)) {
-                                            rc.attack(enemyLoc);
-                                        } else {
-                                            Pathing.moveTowards(rc, enemyLoc);
-                                        }
-                                    } else {
-                                        state = State.SCOUT;
-                                    }
-                                    break;
-                                case FLAG_SPOTTED:
-                                    if (rc.canPickupFlag(rc.getLocation())) {
-                                        rc.pickupFlag(rc.getLocation());
-                                        rc.setIndicatorString("Holding a flag!");
-                                        state = State.FLAG_HOLDING;
-                                    } else if (nearbyFlags.length != 0) {
-                                        MapLocation flagLoc = nearbyFlags[0].getLocation();
-                                        Pathing.moveTowards(rc, flagLoc);
-                                    } else if (enemyRobots.length != 0) {
-                                        state = State.COMBAT;
-                                    } else {
-                                        state = State.SCOUT;
-                                    }
-                                    break;
-                                case FLAG_HOLDING:
-                                    // If we are holding an enemy flag, singularly focus on moving towards
-                                    // an ally spawn zone to capture it! We use the check roundNum >= SETUP_ROUNDS
-                                    // to make sure setup phase has ended.
-                                    if (rc.hasFlag()) {
-                                        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                                        MapLocation firstLoc = spawnLocs[0];
-                                        Pathing.moveTowards(rc, firstLoc);
-                                    } else {
-                                        state = State.SCOUT;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
+                    AttackerStrategy.doAttackerStrategy(rc);
                 }
                 rc.setIndicatorString(macroState + " " + state + " " + Pathing.currentTarget);
             } catch (GameActionException e) {
