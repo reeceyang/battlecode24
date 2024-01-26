@@ -5,7 +5,7 @@ import battlecode.common.*;
 import static v3.RobotPlayer.*;
 
 enum AttackerState {
-    SCOUT, COMBAT, FLAG_SPOTTED, FLAG_HOLDING, RETREAT
+    SCOUT, COMBAT, FLAG_SPOTTED, FLAG_HOLDING, RETREAT, ESCORT, RECAPTURE
 }
 
 public class AttackerStrategy {
@@ -13,25 +13,35 @@ public class AttackerStrategy {
     static AttackerState state = AttackerState.SCOUT;
 
     public static void doAttackerStrategy(RobotController rc) throws GameActionException {
-        Direction randomDir = directions[rng.nextInt(directions.length)];
         switch (macroState) {
 
             case SETUP:
                 // Move and attack randomly if no objective.
                 CrumbMicro.doScoutCrumb(rc);
+                Direction randomDir = directions[rng.nextInt(directions.length)];
                 if (rc.canMove(randomDir)) {
                     rc.move(randomDir);
                 }
                 break;
             case BATTLE:
                 RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                FlagInfo[] nearbyEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
+                FlagInfo[] nearbyOurFlags = rc.senseNearbyFlags(-1, rc.getTeam());
                 FlagInfo nearbyFlag = null;
-                for (FlagInfo flagInfo : rc.senseNearbyFlags(-1, rc.getTeam().opponent())) {
+                for (FlagInfo flagInfo : nearbyEnemyFlags) {
+//                  TODO: make this the closest flag
                     if (!flagInfo.isPickedUp()) {
                         nearbyFlag = flagInfo;
                         break;
                     }
                 }
+                MapLocation nearbyFlagLoc = nearbyFlag == null ? null : nearbyFlag.getLocation();
+                MapLocation nearestEnemyFlagWeHold = Communication.getNearestFlag(rc, rc.getTeam().opponent(), FlagStatus.HELD, nearbyEnemyFlags);
+                MapLocation nearestOurFlagEnemyHolds = Communication.getNearestFlag(rc, rc.getTeam(), FlagStatus.HELD, nearbyOurFlags);
+                MapLocation nearestDroppedEnemyFlagLoc = Communication.getNearestFlag(rc, rc.getTeam().opponent(), FlagStatus.DROPPED, nearbyEnemyFlags);
+                indicator += "uh " + nearestEnemyFlagWeHold + " ";
+                indicator += "eh " + nearestOurFlagEnemyHolds + " ";
+                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
                 switch (state) {
                     case SCOUT:
                         if (rc.getHealth() < RETREAT_THRESHOLD) {
@@ -42,36 +52,36 @@ public class AttackerStrategy {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = AttackerState.COMBAT;
                         } else if (nearbyFlag != null) {
-                            MapLocation flagLoc = nearbyFlag.getLocation();
-                            Pathing.moveTowards(rc, flagLoc);
+                            doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.FLAG_SPOTTED;
+                        } else if (nearestOurFlagEnemyHolds != null) {
+                            Pathing.moveTowards(rc, nearestOurFlagEnemyHolds);
+                            state = AttackerState.RECAPTURE;
+                            // TODO: prevent too many ducks from crowding the flag holder
+//                        } else if (nearestEnemyFlagWeHold != null) {
+//                            Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
+//                            state = AttackerState.ESCORT;
                         } else {
-                            MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();
-                            if (broadcastFlagLocs.length != 0) {
-                                Pathing.moveTowards(rc, broadcastFlagLocs[0]);
-                            } else {
-                                // Move randomly if no objective.
-                                if (rc.canMove(randomDir)) {
-                                    rc.move(randomDir);
-                                }
-                            }
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                         }
                         break;
                     case COMBAT:
-                        if (rc.getHealth() < RETREAT_THRESHOLD) {
-                            RetreatMicro.doRetreat(rc);
-                            state = AttackerState.RETREAT;
-                        } else {
-                            switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
-                                case FIGHTING:
-                                    break;
-                                case SAFE:
-                                    state = AttackerState.SCOUT;
-                                    break;
-                            }
+//                        if (rc.getHealth() < RETREAT_THRESHOLD) {
+//                            RetreatMicro.doRetreat(rc);
+//                            state = AttackerState.RETREAT;
+//                        } else {
+                        switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
+                            case FIGHTING:
+                                break;
+                            case SAFE:
+                                doScout(rc, nearestDroppedEnemyFlagLoc);
+                                HealingMicro.doTryHeal(rc);
+                                state = AttackerState.SCOUT;
+                                break;
                         }
+//                        }
                         break;
                     case FLAG_SPOTTED:
                         if (rc.getHealth() < RETREAT_THRESHOLD) {
@@ -82,14 +92,14 @@ public class AttackerStrategy {
                             rc.pickupFlag(rc.getLocation());
                             RetreatMicro.doRetreat(rc);
                             state = AttackerState.FLAG_HOLDING;
-                        } else if (nearbyFlag != null) {
-                            MapLocation flagLoc = nearbyFlag.getLocation();
-                            Pathing.moveTowards(rc, flagLoc);
-                            HealingMicro.doTryHeal(rc);
                         } else if (enemyRobots.length != 0) {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = AttackerState.COMBAT;
+                        } else if (nearbyFlag != null) {
+                            doMoveShoot(rc, nearbyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
                         } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
                         }
@@ -100,6 +110,7 @@ public class AttackerStrategy {
                         if (rc.hasFlag()) {
                             RetreatMicro.doRetreat(rc);
                         } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
                         }
@@ -109,6 +120,33 @@ public class AttackerStrategy {
                             RetreatMicro.doRetreat(rc);
                             HealingMicro.doTryHeal(rc);
                         } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.SCOUT;
+                        }
+                        break;
+                    case RECAPTURE:
+                        if (enemyRobots.length != 0) {
+                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                            state = AttackerState.COMBAT;
+                        } else if (nearestOurFlagEnemyHolds != null) {
+                            doMoveShoot(rc, nearestOurFlagEnemyHolds);
+                            HealingMicro.doTryHeal(rc);
+                        } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.SCOUT;
+                        }
+                        break;
+                    case ESCORT:
+                        if (enemyRobots.length != 0) {
+                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                            state = AttackerState.COMBAT;
+                        } else if (nearestEnemyFlagWeHold != null) {
+                            doMoveShoot(rc, nearestEnemyFlagWeHold);
+                            HealingMicro.doTryHeal(rc);
+                        } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
                         }
@@ -119,9 +157,27 @@ public class AttackerStrategy {
         indicator += state + " " + Pathing.currentTarget;
     }
 
-    public static void doGoToFlag(RobotController rc, FlagInfo nearbyFlag) {
+
+    static void doMoveShoot(RobotController rc, MapLocation loc) throws GameActionException {
+        Pathing.moveTowards(rc, loc);
+        CombatMicro.doTryShoot(rc);
     }
 
-    public static void doScout(RobotController rc) {
+    static void doScout(RobotController rc, MapLocation nearestEnemyFlagLoc) throws GameActionException {
+        if (nearestEnemyFlagLoc != null) {
+            Pathing.moveTowards(rc, nearestEnemyFlagLoc);
+        }
+
+        MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();
+        if (broadcastFlagLocs.length != 0) {
+            Pathing.moveTowards(rc, broadcastFlagLocs[rng.nextInt(broadcastFlagLocs.length)]);
+            return;
+        }
+
+        Direction randomDir = directions[rng.nextInt(directions.length)];
+        // Move randomly if no objective.
+        if (rc.canMove(randomDir)) {
+            rc.move(randomDir);
+        }
     }
 }

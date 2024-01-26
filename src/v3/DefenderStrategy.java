@@ -47,8 +47,9 @@ class DefenderStrategy {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = DefenderState.COMBAT;
                         } else {
-                            MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                            Pathing.moveTowards(rc, spawnLocs[rng.nextInt(spawnLocs.length)]);
+//                            MapLocation[] spawnLocs = rc.getAllySpawnLocations();
+//                            Pathing.moveTowards(rc, spawnLocs[rng.nextInt(spawnLocs.length)]);
+                            RetreatMicro.doRetreat(rc);
                             HealingMicro.doTryHeal(rc);
                             // Rarely attempt placing traps behind the robot.
                             if (rc.canBuild(TrapType.EXPLOSIVE, rc.getLocation()) && rng.nextInt() % 37 == 1)

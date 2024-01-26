@@ -15,11 +15,11 @@ class CombatMicro {
             RobotInfo enemy = doTryShoot(rc);
             Direction nextDir;
             if (enemy == null) {
-                enemy = enemyRobots[0];
+                enemy = getNextTarget(enemyRobots);
             }
             prevEnemyLoc = enemy.getLocation();
-            // if we can attack the next turn
-            if (rc.getActionCooldownTurns() <= 1
+            // if we can attack the next turn and we have enough health
+            if (rc.getActionCooldownTurns() <= 1 && rc.getHealth() > RobotPlayer.RETREAT_THRESHOLD
                     // pursue enemies with flags or outside action radius
                     && (enemy.hasFlag() || rc.getLocation().distanceSquaredTo(enemy.getLocation()) > GameConstants.ATTACK_RADIUS_SQUARED)
             ) {
@@ -51,14 +51,31 @@ class CombatMicro {
     }
 
     static RobotInfo doTryShoot(RobotController rc) throws GameActionException {
-        RobotInfo[] enemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
-        if (enemyRobots.length != 0) {
-            MapLocation enemyLoc = enemyRobots[0].getLocation();
+        RobotInfo[] shootableEnemyRobots = rc.senseNearbyRobots(GameConstants.ATTACK_RADIUS_SQUARED, rc.getTeam().opponent());
+        if (shootableEnemyRobots.length != 0) {
+            RobotInfo target = getNextTarget(shootableEnemyRobots);
+            MapLocation enemyLoc = target.getLocation();
             if (rc.canAttack(enemyLoc)) {
                 rc.attack(enemyLoc);
-                return enemyRobots[0];
+                return target;
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the next target out of an array of enemies. Prefers enemies with flags.
+     *
+     * @param enemyRobots NONEMPTY array to search through
+     * @return best next target
+     */
+    static RobotInfo getNextTarget(RobotInfo[] enemyRobots) {
+        // pursue enemy robots with flags
+        for (int i = 1; i < enemyRobots.length; i++) {
+            if (enemyRobots[i].hasFlag()) {
+                return enemyRobots[i];
+            }
+        }
+        return enemyRobots[0];
     }
 }

@@ -63,7 +63,9 @@ public strictfp class RobotPlayer {
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
         rng = new Random(rc.getID());
-        robotType = rc.getID() % 3 == 1 ? RobotType.DEFENDER : RobotType.ATTACKER;
+        robotType = rc.getID() % 5 == 1 ? RobotType.DEFENDER : RobotType.ATTACKER;
+        Pathing.leftHanded = rc.getID() % 2 == 0;
+
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
             // loop. If we ever leave this loop and return from run(), the robot dies! At the end of the
@@ -84,7 +86,12 @@ public strictfp class RobotPlayer {
                     // Pick a random spawn location to attempt spawning in.
                     MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
                     if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
-                } else {
+                }
+                if (rc.isSpawned()) {
+                    for (FlagInfo flagInfo : rc.senseNearbyFlags(-1)) {
+                        Communication.reportFlag(rc, flagInfo);
+                    }
+//                    Communication.printFlagInfo(rc);
                     switch (robotType) {
                         case ATTACKER:
                             AttackerStrategy.doAttackerStrategy(rc);
@@ -94,6 +101,7 @@ public strictfp class RobotPlayer {
                             break;
                     }
                 }
+
                 rc.setIndicatorString(indicator);
             } catch (GameActionException e) {
                 // Oh no! It looks like we did something illegal in the Battlecode world. You should

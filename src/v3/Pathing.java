@@ -12,6 +12,9 @@ public class Pathing {
     public static int BUG_MODE_TIME_LIMIT;
     static Direction currentDirection = null;
     static MapLocation previousTarget = null;
+    /**
+     * Only used for the indicator string!
+     */
     static MapLocation currentTarget = null;
     static int progressCountdown = TIME_LIMIT;
     static int closest = Integer.MAX_VALUE;
@@ -30,6 +33,7 @@ public class Pathing {
         if (!target.equals(previousTarget)) {
             previousTarget = target;
             closest = rc.getLocation().distanceSquaredTo(target);
+            currentDirection = null;
         }
 //        if (rc.getLocation().isAdjacentTo(target)) {
 //            bugMode = false;
