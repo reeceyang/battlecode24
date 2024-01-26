@@ -16,8 +16,17 @@ class DefenderStrategy {
         Direction randomDir = directions[rng.nextInt(directions.length)];
         switch (macroState) {
             case SETUP:
+
+                // If designated a trap-setting duck and 2 or fewer traps exist in vicinity of spawn, set traps
+                if (rc.senseMapInfo(rc.getLocation()).isSpawnZone() && rc.getID() % 10 == 0 && TrapMicro.numTrapsNearby(rc, rc.senseNearbyMapInfos(-1)) < 3) {
+                    TrapMicro.doSetFlagTraps(rc, rc.senseNearbyFlags(-1)[0].getLocation());
+                }
+
                 // If a crumb is sensed, move towards the crumb.
                 CrumbMicro.doScoutCrumb(rc);
+
+                // Set a trap if near enemy territory and if no traps are nearby.
+                TrapMicro.doSetEnemyTraps(rc);
 
                 // Move and attack randomly if no objective.
                 if (rc.canMove(randomDir)) {
