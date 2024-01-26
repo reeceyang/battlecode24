@@ -18,6 +18,7 @@ public class AttackerStrategy {
 
             case SETUP:
                 // Move and attack randomly if no objective.
+                CrumbMicro.doScoutCrumb(rc);
                 if (rc.canMove(randomDir)) {
                     rc.move(randomDir);
                 }

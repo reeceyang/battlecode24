@@ -16,6 +16,9 @@ class DefenderStrategy {
         Direction randomDir = directions[rng.nextInt(directions.length)];
         switch (macroState) {
             case SETUP:
+                // If a crumb is sensed, move towards the crumb.
+                CrumbMicro.doScoutCrumb(rc);
+
                 // Move and attack randomly if no objective.
                 if (rc.canMove(randomDir)) {
                     rc.move(randomDir);
