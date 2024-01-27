@@ -2,10 +2,10 @@
 COST = 'cost'
 OPEN = 'open'
 
-SIZE = 5  # size of the grid
-DMIN = -2
-DMAX = 2
-HOME = 2  # center of the grid
+SIZE = 7  # size of the grid
+DMIN = -3
+DMAX = 3
+HOME = 3  # center of the grid
 
 MAX_V = 2147483647
 

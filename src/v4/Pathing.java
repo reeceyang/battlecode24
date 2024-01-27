@@ -13,7 +13,6 @@ enum PathingState {
 
 public class Pathing {
 
-    static final int baseExclusionRadius = 16;
     // Basic bug nav - Bug 0
     static final int STUCK_RADIUS_SQ = 16;
     static final int TIME_LIMIT = 3;
@@ -176,6 +175,17 @@ public class Pathing {
                 return;
             }
             currentDirection = currentDirection.rotateLeft();
+        }
+    }
+
+    static void doMoveRealRandom(RobotController rc) throws GameActionException {
+        Direction randomDir = directions[rng.nextInt(directions.length)];
+        for (int i = 0; i < Direction.allDirections().length; i++) {
+            if (rc.canMove(randomDir)) {
+                rc.move(randomDir);
+                return;
+            }
+            randomDir = randomDir.rotateLeft();
         }
     }
 

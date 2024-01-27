@@ -10,26 +10,28 @@ class CombatMicro {
 
     static MapLocation prevEnemyLoc;
 
-    static CombatResult doCombatMicro(RobotController rc, RobotInfo[] enemyRobots) throws GameActionException {
+    static CombatResult doCombatMicro(RobotController rc) throws GameActionException {
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        RobotInfo[] ourRobots = rc.senseNearbyRobots(-1, rc.getTeam());
         if (enemyRobots.length != 0) {
             RobotInfo enemy = doTryShoot(rc);
-            Direction nextDir = Direction.CENTER;
             if (enemy == null) {
                 enemy = getNextTarget(enemyRobots);
             }
             prevEnemyLoc = enemy.getLocation();
             // if we can attack the next turn and we have enough health
-            if (rc.getActionCooldownTurns() <= 1// && rc.getHealth() > RobotPlayer.RETREAT_THRESHOLD
+            if (rc.getActionCooldownTurns() <= 1 //&& rc.getHealth() > RobotPlayer.RETREAT_THRESHOLD
                     // pursue enemies with flags or outside action radius
                     && (enemy.hasFlag() || rc.getLocation().distanceSquaredTo(enemy.getLocation()) > GameConstants.ATTACK_RADIUS_SQUARED)
             ) {
-                nextDir = rc.getLocation().directionTo(enemy.getLocation());
+                Pathing.moveTowards(rc, enemy.getLocation());
+            } else if (ourRobots.length > 0) {
+                Pathing.moveTowards(rc, ourRobots[0].getLocation());
             } else if (enemyRobots.length > 1) {
                 // kite away from enemies in action radius
-                nextDir = enemy.getLocation().directionTo(rc.getLocation());
+                Direction nextDir = enemy.getLocation().directionTo(rc.getLocation());
+                Pathing.moveTowards(rc, rc.getLocation().add(nextDir));
             }
-            MapLocation nextLoc = rc.getLocation().add(nextDir);
-            Pathing.moveTowards(rc, nextLoc);
             doTryShoot(rc); // move shoot
 
             HealingMicro.doTryHeal(rc);

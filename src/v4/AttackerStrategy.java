@@ -42,7 +42,6 @@ public class AttackerStrategy {
                 }
                 break;
             case BATTLE:
-                RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
                 FlagInfo[] nearbyEnemyFlags = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
                 FlagInfo[] nearbyOurFlags = rc.senseNearbyFlags(-1, rc.getTeam());
                 FlagInfo nearbyFlag = null;
@@ -64,9 +63,7 @@ public class AttackerStrategy {
 //                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
                 switch (state) {
                     case SCOUT:
-                        if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
-                        }
+                        CombatMicro.doCombatMicro(rc);
                         if (nearbyFlag != null) {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
@@ -110,7 +107,7 @@ public class AttackerStrategy {
 //                            RetreatMicro.doRetreat(rc);
 //                            state = AttackerState.RETREAT;
 //                        } else {
-                            switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
+                            switch (CombatMicro.doCombatMicro(rc)) {
                                 case FIGHTING:
                                     break;
                                 case SAFE:
@@ -130,14 +127,13 @@ public class AttackerStrategy {
                         } else if (nearbyFlag != null) {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
-                        } else if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                        } else {
+                            CombatMicro.doCombatMicro(rc);
 //                            state = AttackerState.COMBAT;
 //                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
 //                            RetreatMicro.doRetreatHome(rc);
 //                            HealingMicro.doTryHeal(rc);
 //                            state = AttackerState.RETREAT;
-                        } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
@@ -149,9 +145,7 @@ public class AttackerStrategy {
                         if (rc.hasFlag()) {
                             RetreatMicro.doRetreatClosestSpawn(rc);
                         } else {
-                            if (enemyRobots.length != 0) {
-                                CombatMicro.doCombatMicro(rc, enemyRobots);
-                            }
+                            CombatMicro.doCombatMicro(rc);
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
@@ -168,10 +162,8 @@ public class AttackerStrategy {
                         }
                         break;
                     case RECAPTURE:
-                        if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                        CombatMicro.doCombatMicro(rc);
 //                            state = AttackerState.COMBAT;
-                        }
                         if (nearestOurFlagEnemyHolds != null) {
                             doMoveShoot(rc, nearestOurFlagEnemyHolds);
                             HealingMicro.doTryHeal(rc);
@@ -190,27 +182,25 @@ public class AttackerStrategy {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.FLAG_SPOTTED;
-                        } else if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                        } else {
+                            CombatMicro.doCombatMicro(rc);
 //                            state = AttackerState.COMBAT;
 //                        } else if (nearestEnemyFlagWeHold != null) {
 //                            doMoveShoot(rc, nearestEnemyFlagWeHold.subtract(rc.getLocation().directionTo(nearestEnemyFlagWeHold)));
 //                            HealingMicro.doTryHeal(rc);
-                        }
-                        if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
-                            Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.ESCORT;
-                        } else {
-                            doScout(rc, nearestDroppedEnemyFlagLoc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.SCOUT;
+                            if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
+                                Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
+                                HealingMicro.doTryHeal(rc);
+                                state = AttackerState.ESCORT;
+                            } else {
+                                doScout(rc, nearestDroppedEnemyFlagLoc);
+                                HealingMicro.doTryHeal(rc);
+                                state = AttackerState.SCOUT;
+                            }
                         }
                         break;
                     case REINFORCE:
-                        if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
-                        }
+                        CombatMicro.doCombatMicro(rc);
                         if (nearbyFlag != null) {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
