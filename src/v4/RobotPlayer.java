@@ -144,7 +144,7 @@ public strictfp class RobotPlayer {
                     }
                     switch (macroState) {
                         case SETUP:
-                            if (rc.getRoundNum() == 1 && rc.senseNearbyRobots(-1).length == 0) {
+                            if (rc.getRoundNum() == 1 && rc.senseNearbyRobots(GameConstants.INTERACT_RADIUS_SQUARED).length == 0) {
                                 flagHomes = Communication.getFlagHomes(rc);
                                 robotType = RobotType.DEFENDER;
                                 for (int i = 0; i < flagHomes.length; i++) {
@@ -153,7 +153,7 @@ public strictfp class RobotPlayer {
                                         break;
                                     }
                                 }
-//                                System.out.println("Assigned defender at " + flagHomes[flagHomeIdx].loc);
+                                System.out.println("Assigned defender at " + flagHomes[flagHomeIdx].loc);
                             }
                             break;
                         case BATTLE:
