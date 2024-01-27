@@ -50,9 +50,9 @@ public strictfp class RobotPlayer {
             Direction.WEST,
             Direction.NORTHWEST,
     };
-    static final int RETREAT_THRESHOLD = 500;
-    static final int ABANDON_THRESHOLD = 80;
+    static final int RETREAT_THRESHOLD = 300;
     static final GlobalUpgrade[] GLOBAL_UPGRADES = {GlobalUpgrade.ACTION, GlobalUpgrade.CAPTURING, GlobalUpgrade.HEALING};
+    static int ABANDON_THRESHOLD;
     static int abandonCountdown = ABANDON_THRESHOLD;
     /**
      * A random number generator.
@@ -82,7 +82,7 @@ public strictfp class RobotPlayer {
         rng = new Random(rc.getID());
         Pathing.leftHanded = rc.getID() % 2 == 0;
         flagHomeIdx = rc.getID() % GameConstants.NUMBER_FLAGS;
-
+        ABANDON_THRESHOLD = (rc.getMapHeight() + rc.getMapWidth()) / 2;
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
             // loop. If we ever leave this loop and return from run(), the robot dies! At the end of the
