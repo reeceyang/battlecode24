@@ -80,20 +80,29 @@ public class AttackerStrategy {
                         }
                         break;
                     case COMBAT:
+                        if (rc.canPickupFlag(rc.getLocation())) {
+                            rc.pickupFlag(rc.getLocation());
+                            RetreatMicro.doRetreatClosestSpawn(rc);
+                            state = AttackerState.FLAG_HOLDING;
+                        } else if (nearbyFlag != null) {
+                            doMoveShoot(rc, nearbyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.FLAG_SPOTTED;
+                        } else {
 //                        if (rc.getHealth() < RETREAT_THRESHOLD) {
 //                            RetreatMicro.doRetreat(rc);
 //                            state = AttackerState.RETREAT;
 //                        } else {
-                        switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
-                            case FIGHTING:
-                                break;
-                            case SAFE:
-                                doScout(rc, nearestDroppedEnemyFlagLoc);
-                                HealingMicro.doTryHeal(rc);
-                                state = AttackerState.SCOUT;
-                                break;
+                            switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
+                                case FIGHTING:
+                                    break;
+                                case SAFE:
+                                    doScout(rc, nearestDroppedEnemyFlagLoc);
+                                    HealingMicro.doTryHeal(rc);
+                                    state = AttackerState.SCOUT;
+                                    break;
+                            }
                         }
-//                        }
                         break;
                     case FLAG_SPOTTED:
                         // TODO: go over the priorities here
@@ -152,7 +161,15 @@ public class AttackerStrategy {
                         }
                         break;
                     case ESCORT:
-                        if (enemyRobots.length != 0) {
+                        if (rc.canPickupFlag(rc.getLocation())) {
+                            rc.pickupFlag(rc.getLocation());
+                            RetreatMicro.doRetreatClosestSpawn(rc);
+                            state = AttackerState.FLAG_HOLDING;
+                        } else if (nearbyFlag != null) {
+                            doMoveShoot(rc, nearbyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.FLAG_SPOTTED;
+                        } else if (enemyRobots.length != 0) {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = AttackerState.COMBAT;
                         } else if (nearestEnemyFlagWeHold != null) {

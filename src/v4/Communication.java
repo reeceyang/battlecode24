@@ -129,7 +129,8 @@ public class Communication {
                     }
                 }
 
-                if (nearestLoc == null || rc.getLocation().distanceSquaredTo(flagLoc) < rc.getLocation().distanceSquaredTo(nearestLoc)) {
+                if (nearestLoc == null ||
+                        rc.getLocation().distanceSquaredTo(flagLoc) < rc.getLocation().distanceSquaredTo(nearestLoc)) {
                     nearestLoc = flagLoc;
                 }
             }

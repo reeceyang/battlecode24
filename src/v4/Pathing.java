@@ -145,13 +145,15 @@ public class Pathing {
     }
 
     static void doMoveRandom(RobotController rc) throws GameActionException {
-        Direction randomDir = directions[rng.nextInt(directions.length)];
+        if (currentDirection == null) {
+            currentDirection = directions[rng.nextInt(directions.length)];
+        }
         for (int i = 0; i < Direction.allDirections().length; i++) {
-            if (rc.canMove(randomDir)) {
-                rc.move(randomDir);
+            if (rc.canMove(currentDirection)) {
+                rc.move(currentDirection);
                 return;
             }
-            randomDir = randomDir.rotateLeft();
+            currentDirection = currentDirection.rotateLeft();
         }
     }
 
