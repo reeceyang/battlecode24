@@ -1,4 +1,4 @@
-package v3;
+package v3a;
 
 import battlecode.common.*;
 
@@ -10,24 +10,6 @@ enum MacroState {
 
 enum RobotType {
     ATTACKER, DEFENDER
-}
-
-class FlagHome {
-    MapLocation loc;
-    int flagID;
-
-    FlagHome(MapLocation loc, int flagID) {
-        this.loc = loc;
-        this.flagID = flagID;
-    }
-
-    @Override
-    public String toString() {
-        return "FlagHome{" +
-                "loc=" + loc +
-                ", flagID=" + flagID +
-                '}';
-    }
 }
 
 /**
@@ -51,9 +33,12 @@ public strictfp class RobotPlayer {
             Direction.NORTHWEST,
     };
     static final int RETREAT_THRESHOLD = 500;
-    static final int ABANDON_THRESHOLD = 80;
-    static int abandonCountdown = ABANDON_THRESHOLD;
-
+    /**
+     * We will use this variable to count the number of turns this robot has been alive.
+     * You can use static variables like this to save any information you want. Keep in mind that even though
+     * these variables are static, in Battlecode they aren't actually shared between your robots.
+     */
+    static int turnCount = 0;
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
@@ -65,10 +50,8 @@ public strictfp class RobotPlayer {
      * The current state of this duck.
      */
     static MacroState macroState = MacroState.SETUP;
-    static RobotType robotType = RobotType.ATTACKER;
+    static RobotType robotType;
     static String indicator;
-    static FlagHome[] flagHomes = new FlagHome[GameConstants.NUMBER_FLAGS];
-    static int flagHomeIdx;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -80,86 +63,28 @@ public strictfp class RobotPlayer {
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
         rng = new Random(rc.getID());
-//        robotType = rc.getID() % 8 == 1 ? RobotType.DEFENDER : RobotType.ATTACKER;
-        Pathing.leftHanded = rc.getID() % 2 == 0;
-        flagHomeIdx = rc.getID() % GameConstants.NUMBER_FLAGS;
-
+        robotType = rc.getID() % 3 == 1 ? RobotType.DEFENDER : RobotType.ATTACKER;
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
             // loop. If we ever leave this loop and return from run(), the robot dies! At the end of the
             // loop, we call Clock.yield(), signifying that we've done everything we want to do.
+
+            turnCount += 1;  // We have now been alive for one more turn!
+            if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
+                macroState = MacroState.BATTLE;
+            }
             indicator = robotType + " ";
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
-                if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
-                    // Battle
-                    macroState = MacroState.BATTLE;
-
-                    // make sure the home flag still exists
-                    FlagStatus flagStatus = Communication.getHomeFlagStatus(rc);
-                    if (flagStatus == FlagStatus.UNKNOWN) {
-                        abandonCountdown--;
-                    } else {
-                        abandonCountdown = ABANDON_THRESHOLD;
-                    }
-                    indicator += "h " + flagHomes[flagHomeIdx].loc + " ";
-                    if (abandonCountdown <= 0) {
-//                        System.out.println("abandoning " + flagHomes[flagHomeIdx].loc);
-                        robotType = RobotType.ATTACKER;
-                        flagHomeIdx = (flagHomeIdx + 1) % GameConstants.NUMBER_FLAGS;
-                    }
-                } else {
-                    // Setup
-                    if (flagHomes[0] == null || flagHomes[1] == null || flagHomes[2] == null) {
-                        flagHomes = Communication.getFlagHomes(rc);
-//                    System.out.println(flagHomeIdx + " " + flagHomes[flagHomeIdx].flagID + " " + flagHomes[flagHomeIdx].loc);
-                    }
-                }
                 // Make sure you spawn your robot in before you attempt to take any actions!
                 // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
-                if (!rc.isSpawned() && flagHomes[flagHomeIdx] != null) {
-                    // Try to spawn at home first.
-                    for (Direction dir : Direction.allDirections()) {
-                        MapLocation loc = flagHomes[flagHomeIdx].loc.add(dir);
-                        if (rc.canSpawn(loc)) {
-                            rc.spawn(loc);
-                            break;
-                        }
-                    }
-                }
                 if (!rc.isSpawned()) {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                    // Pick the first possible spawn location
-                    for (MapLocation loc : spawnLocs) {
-                        if (rc.canSpawn(loc)) {
-                            rc.spawn(loc);
-                            break;
-                        }
-                    }
-                }
-                if (rc.isSpawned()) {
-                    for (FlagInfo flagInfo : rc.senseNearbyFlags(-1)) {
-                        Communication.reportFlag(rc, flagInfo);
-                    }
-                    switch (macroState) {
-                        case SETUP:
-                            if (rc.getRoundNum() == 1 && rc.senseNearbyRobots(-1).length == 0) {
-                                flagHomes = Communication.getFlagHomes(rc);
-                                robotType = RobotType.DEFENDER;
-                                for (int i = 0; i < flagHomes.length; i++) {
-                                    if (flagHomes[i] != null && flagHomes[i].loc.distanceSquaredTo(rc.getLocation()) < GameConstants.ATTACK_RADIUS_SQUARED) {
-                                        flagHomeIdx = i;
-                                        break;
-                                    }
-                                }
-//                                System.out.println("Assigned defender at " + flagHomes[flagHomeIdx].loc);
-                            }
-                            break;
-                        case BATTLE:
-                            break;
-                    }
-//                    Communication.printFlagInfo(rc);
+                    // Pick a random spawn location to attempt spawning in.
+                    MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
+                    if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
+                } else {
                     switch (robotType) {
                         case ATTACKER:
                             AttackerStrategy.doAttackerStrategy(rc);
@@ -169,7 +94,6 @@ public strictfp class RobotPlayer {
                             break;
                     }
                 }
-
                 rc.setIndicatorString(indicator);
             } catch (GameActionException e) {
                 // Oh no! It looks like we did something illegal in the Battlecode world. You should

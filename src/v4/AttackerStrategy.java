@@ -1,8 +1,8 @@
-package v3;
+package v4;
 
 import battlecode.common.*;
 
-import static v3.RobotPlayer.*;
+import static v4.RobotPlayer.*;
 
 enum AttackerState {
     SCOUT, COMBAT, FLAG_SPOTTED, FLAG_HOLDING, RETREAT, ESCORT, RECAPTURE

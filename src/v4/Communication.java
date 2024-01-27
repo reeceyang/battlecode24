@@ -1,8 +1,8 @@
-package v3;
-
-import static v3.RobotPlayer.*;
+package v4;
 
 import battlecode.common.*;
+
+import static v4.RobotPlayer.*;
 
 enum FlagStatus {
     HOME(3),
