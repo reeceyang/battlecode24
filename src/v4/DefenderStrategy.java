@@ -53,14 +53,14 @@ class DefenderStrategy {
                             Pathing.doCheckedNaiveMoveTowards(rc, flagHomes[flagHomeIdx].loc);
                         } else {
                             // Move randomly if no objective.
-                            Pathing.doMoveRandom(rc);
+                            Pathing.doMoveRealRandom(rc);
                         }
                         HealingMicro.doTryHeal(rc);
                         TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc); // TODO: this moves at the end, avoid
                         TrapMicro.doSetFlagTraps(rc, rc.getLocation()); // TODO: this moves at the end, avoid
                         break;
                     case COMBAT:
-                        switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {
+                        switch (CombatMicro.doCombatMicro(rc)) {
                             case FIGHTING:
                                 break;
                             case SAFE:
