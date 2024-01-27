@@ -250,8 +250,8 @@ public class AttackerStrategy {
         Symmetry.updateSymmetries(rc, flagHomes);
         MapLocation plausibleEnemyLoc = Symmetry.decidePlausibleLoc(rc, flagHomes);
         if (plausibleEnemyLoc != null) {
-            Pathing.moveTowards(rc, Symmetry.decidePlausibleLoc(rc, flagHomes));
-            rc.setIndicatorLine(rc.getLocation(), Symmetry.decidePlausibleLoc(rc, flagHomes), 255, 255, 255);
+            Pathing.moveTowards(rc, plausibleEnemyLoc);
+            rc.setIndicatorLine(rc.getLocation(), plausibleEnemyLoc, 255, 255, 255);
         }
 
         MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();
