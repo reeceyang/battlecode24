@@ -131,14 +131,16 @@ public class Communication {
                         continue;
                     }
                 }
+                return flagLoc;
 
-                if (nearestLoc == null ||
-                        rc.getLocation().distanceSquaredTo(flagLoc) < rc.getLocation().distanceSquaredTo(nearestLoc)) {
-                    nearestLoc = flagLoc;
-                }
+//                if (nearestLoc == null ||
+//                        rc.getLocation().distanceSquaredTo(flagLoc) < rc.getLocation().distanceSquaredTo(nearestLoc)) {
+//                    nearestLoc = flagLoc;
+//                }
             }
         }
-        return nearestLoc;
+        return null;
+//        return nearestLoc;
     }
 
     static void printFlagInfo(RobotController rc) throws GameActionException {

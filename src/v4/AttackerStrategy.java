@@ -11,6 +11,7 @@ enum AttackerState {
 public class AttackerStrategy {
 
     static AttackerState state = AttackerState.SCOUT;
+    static MapLocation scoutTarget = null;
 
     public static void doAttackerStrategy(RobotController rc) throws GameActionException {
         switch (macroState) {
@@ -60,7 +61,7 @@ public class AttackerStrategy {
 //                indicator += "r " + mostEnemyCountHomeLoc + " ";
 //                indicator += "uh " + nearestEnemyFlagWeHold + " ";
 //                indicator += "eh " + nearestOurFlagEnemyHolds + " ";
-//                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
+                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
                 switch (state) {
                     case SCOUT:
                         CombatMicro.doCombatMicro(rc);
@@ -242,21 +243,26 @@ public class AttackerStrategy {
         CombatMicro.doTryShoot(rc);
     }
 
-    static void doScout(RobotController rc, MapLocation nearestEnemyFlagLoc) throws GameActionException {
-        if (nearestEnemyFlagLoc != null) {
-            Pathing.moveTowards(rc, nearestEnemyFlagLoc);
+    static void doScout(RobotController rc, MapLocation nearestDroppedEnemyFlagLoc) throws GameActionException {
+        if (nearestDroppedEnemyFlagLoc != null) {
+            Pathing.moveTowards(rc, nearestDroppedEnemyFlagLoc);
+            scoutTarget = nearestDroppedEnemyFlagLoc;
+            return;
         }
 
         Symmetry.updateSymmetries(rc, flagHomes);
         MapLocation plausibleEnemyLoc = Symmetry.decidePlausibleLoc(rc, flagHomes);
         if (plausibleEnemyLoc != null) {
             Pathing.moveTowards(rc, plausibleEnemyLoc);
-            rc.setIndicatorLine(rc.getLocation(), plausibleEnemyLoc, 255, 255, 255);
+//            rc.setIndicatorLine(rc.getLocation(), plausibleEnemyLoc, 255, 255, 255);
+            scoutTarget = plausibleEnemyLoc;
+            return;
         }
 
         MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();
         if (broadcastFlagLocs.length != 0) {
-            Pathing.moveTowards(rc, broadcastFlagLocs[rng.nextInt(broadcastFlagLocs.length)]);
+            Pathing.moveTowards(rc, broadcastFlagLocs[0]);
+            scoutTarget = broadcastFlagLocs[0];
             return;
         }
 

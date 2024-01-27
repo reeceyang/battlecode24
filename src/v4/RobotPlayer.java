@@ -139,6 +139,21 @@ public strictfp class RobotPlayer {
                         }
                     }
                 }
+                // Try to spawn at the closest spawn to the scout target
+                if (!rc.isSpawned() && robotType == RobotType.ATTACKER && AttackerStrategy.scoutTarget != null) {
+                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
+                    MapLocation closestLoc = null;
+                    for (MapLocation loc : spawnLocs) {
+                        if (rc.canSpawn(loc) &&
+                                (closestLoc == null
+                                        || loc.distanceSquaredTo(AttackerStrategy.scoutTarget) < closestLoc.distanceSquaredTo(AttackerStrategy.scoutTarget))) {
+                            closestLoc = loc;
+                        }
+                    }
+                    if (closestLoc != null) {
+                        rc.spawn(closestLoc);
+                    }
+                }
                 if (!rc.isSpawned() && flagHomes[flagHomeIdx] != null) {
                     // Try to spawn at home.
                     for (Direction dir : Direction.allDirections()) {
@@ -196,8 +211,10 @@ public strictfp class RobotPlayer {
                             DefenderStrategy.doDefenderStrategy(rc);
                             break;
                     }
+                    if (Pathing.currentTarget != null) {
+                        rc.setIndicatorLine(rc.getLocation(), Pathing.currentTarget, 255, 255, 255);
+                    }
                 }
-
                 rc.setIndicatorString(indicator);
             } catch (GameActionException e) {
                 // Oh no! It looks like we did something illegal in the Battlecode world. You should

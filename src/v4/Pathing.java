@@ -15,7 +15,7 @@ public class Pathing {
 
     // Basic bug nav - Bug 0
     static final int STUCK_RADIUS_SQ = 16;
-    static final int TIME_LIMIT = 3;
+    static final int TIME_LIMIT = 10;
     public static boolean leftHanded = false;
     public static int BUG_MODE_TIME_LIMIT;
     static Direction currentDirection = null;

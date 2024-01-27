@@ -10,6 +10,7 @@ class CombatMicro {
 
     static MapLocation prevEnemyLoc;
 
+    // TODO: add arg that is to be reckless
     static CombatResult doCombatMicro(RobotController rc) throws GameActionException {
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         RobotInfo[] ourRobots = rc.senseNearbyRobots(-1, rc.getTeam());
