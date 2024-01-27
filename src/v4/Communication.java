@@ -189,6 +189,12 @@ public class Communication {
         MapLocation loc = null;
         int mostEnemyCount = 0;
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
+            int metaIdx = OUR_FLAGS_START_IDX + i * FLAG_INFO_SIZE + FLAG_META_OFFSET;
+            int bitPackedMeta = rc.readSharedArray(metaIdx);
+            // Don't reinforce a flag of an unknown status
+            if (readBitPackedFlagStatus(bitPackedMeta) == FlagStatus.UNKNOWN) {
+                continue;
+            }
             int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
             if (enemyCount > mostEnemyCount) {
                 mostEnemyCount = enemyCount;
@@ -201,7 +207,6 @@ public class Communication {
     static void printHomeEnemyCounts(RobotController rc) throws GameActionException {
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
             int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
-            System.out.println(flagHomes[i].loc + " " + enemyCount);
         }
     }
 }

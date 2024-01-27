@@ -43,17 +43,13 @@ public class AttackerStrategy {
 //                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
                 switch (state) {
                     case SCOUT:
-                        if (rc.getHealth() < RETREAT_THRESHOLD) {
-                            RetreatMicro.doRetreatHome(rc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.RETREAT;
-                        } else if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
-                            state = AttackerState.COMBAT;
-                        } else if (nearbyFlag != null) {
+                        if (nearbyFlag != null) {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.FLAG_SPOTTED;
+                        } else if (enemyRobots.length != 0) {
+                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                            state = AttackerState.COMBAT;
                         } else if (nearestOurFlagEnemyHolds != null) {
                             Pathing.moveTowards(rc, nearestOurFlagEnemyHolds);
                             HealingMicro.doTryHeal(rc);
@@ -67,6 +63,10 @@ public class AttackerStrategy {
                             Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.ESCORT;
+                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
+                            RetreatMicro.doRetreatHome(rc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.RETREAT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
@@ -90,20 +90,20 @@ public class AttackerStrategy {
                         break;
                     case FLAG_SPOTTED:
                         // TODO: go over the priorities here
-                        if (rc.getHealth() < RETREAT_THRESHOLD) {
-                            RetreatMicro.doRetreatHome(rc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.RETREAT;
-                        } else if (rc.canPickupFlag(rc.getLocation())) {
+                        if (rc.canPickupFlag(rc.getLocation())) {
                             rc.pickupFlag(rc.getLocation());
                             RetreatMicro.doRetreatClosestSpawn(rc);
                             state = AttackerState.FLAG_HOLDING;
-                        } else if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
-                            state = AttackerState.COMBAT;
                         } else if (nearbyFlag != null) {
                             doMoveShoot(rc, nearbyFlagLoc);
                             HealingMicro.doTryHeal(rc);
+                        } else if (enemyRobots.length != 0) {
+                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                            state = AttackerState.COMBAT;
+                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
+                            RetreatMicro.doRetreatHome(rc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.RETREAT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
