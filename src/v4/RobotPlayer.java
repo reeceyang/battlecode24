@@ -52,8 +52,8 @@ public strictfp class RobotPlayer {
     };
     static final int RETREAT_THRESHOLD = 500;
     static final int ABANDON_THRESHOLD = 80;
+    static final GlobalUpgrade[] GLOBAL_UPGRADES = {GlobalUpgrade.ACTION, GlobalUpgrade.CAPTURING, GlobalUpgrade.HEALING};
     static int abandonCountdown = ABANDON_THRESHOLD;
-
     /**
      * A random number generator.
      * We will use this RNG to make some random moves. The Random class is provided by the java.util.Random
@@ -116,6 +116,13 @@ public strictfp class RobotPlayer {
 //                    System.out.println(flagHomeIdx + " " + flagHomes[flagHomeIdx].flagID + " " + flagHomes[flagHomeIdx].loc);
                     }
                 }
+
+                for (GlobalUpgrade globalUpgrade : GLOBAL_UPGRADES) {
+                    if (rc.canBuyGlobal(globalUpgrade)) {
+                        rc.buyGlobal(globalUpgrade);
+                    }
+                }
+
                 // Make sure you spawn your robot in before you attempt to take any actions!
                 // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
                 if (!rc.isSpawned() && flagHomes[flagHomeIdx] != null) {
