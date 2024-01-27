@@ -12,16 +12,12 @@ public class TrapMicro {
     }
 
     static void doSetFlagTraps(RobotController rc, MapLocation flagLoc) throws GameActionException {
-        if (rc.getLocation().equals(flagLoc)) {
-            TrapType flagTrap = decideTrap(rc);
-            for (Direction dir : Direction.allDirections()) {
-                MapLocation loc = flagLoc.add(dir);
-                if (rc.canBuild(flagTrap, loc)) {
-                    rc.build(flagTrap, loc);
-                }
+        TrapType flagTrap = decideTrap(rc);
+        for (Direction dir : Direction.allDirections()) {
+            MapLocation loc = flagLoc.add(dir);
+            if (rc.canBuild(flagTrap, loc)) {
+                rc.build(flagTrap, loc);
             }
-        } else {
-            Pathing.moveTowards(rc, flagLoc);
         }
     }
 

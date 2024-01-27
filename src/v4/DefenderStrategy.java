@@ -13,7 +13,6 @@ class DefenderStrategy {
     static DefenderState state = DefenderState.PATROL;
 
     static void doDefenderStrategy(RobotController rc) throws GameActionException {
-        Direction randomDir = directions[rng.nextInt(directions.length)];
         switch (macroState) {
             case SETUP:
 
@@ -35,9 +34,6 @@ class DefenderStrategy {
 //                TrapMicro.doSetEnemyTraps(rc);
 
                 // Move and attack randomly if no objective.
-                if (rc.canMove(randomDir)) {
-                    rc.move(randomDir);
-                }
 
                 // Rarely attempt placing traps behind the robot.
 //                MapLocation prevLoc = rc.getLocation().subtract(randomDir);
@@ -57,9 +53,7 @@ class DefenderStrategy {
                             Pathing.doCheckedNaiveMoveTowards(rc, flagHomes[flagHomeIdx].loc);
                         } else {
                             // Move randomly if no objective.
-                            if (rc.canMove(randomDir)) {
-                                rc.move(randomDir);
-                            }
+                            Pathing.doMoveRandom(rc);
                         }
                         HealingMicro.doTryHeal(rc);
                         TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc); // TODO: this moves at the end, avoid

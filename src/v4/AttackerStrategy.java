@@ -18,10 +18,7 @@ public class AttackerStrategy {
             case SETUP:
                 // Move and attack randomly if no objective.
                 CrumbMicro.doScoutCrumb(rc);
-                Direction randomDir = directions[rng.nextInt(directions.length)];
-                if (rc.canMove(randomDir)) {
-                    rc.move(randomDir);
-                }
+                Pathing.doMoveRandom(rc);
                 break;
             case BATTLE:
                 RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
@@ -197,10 +194,6 @@ public class AttackerStrategy {
             return;
         }
 
-        Direction randomDir = directions[rng.nextInt(directions.length)];
-        // Move randomly if no objective.
-        if (rc.canMove(randomDir)) {
-            rc.move(randomDir);
-        }
+        Pathing.doMoveRandom(rc);
     }
 }

@@ -5,6 +5,9 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
+import static v4.RobotPlayer.directions;
+import static v4.RobotPlayer.rng;
+
 public class Pathing {
 
     static final int baseExclusionRadius = 16;
@@ -74,6 +77,11 @@ public class Pathing {
         Direction d = rc.getLocation().directionTo(loc);
         if (rc.canMove(d)) {
             rc.move(d);
+        } else if (rc.canFill(loc)) {
+            rc.fill(loc);
+            if (rc.canMove(d)) {
+                rc.move(d);
+            }
         }
     }
 
@@ -133,6 +141,17 @@ public class Pathing {
             } else {
                 currentDirection = currentDirection.rotateRight();
             }
+        }
+    }
+
+    static void doMoveRandom(RobotController rc) throws GameActionException {
+        Direction randomDir = directions[rng.nextInt(directions.length)];
+        for (int i = 0; i < Direction.allDirections().length; i++) {
+            if (rc.canMove(randomDir)) {
+                rc.move(randomDir);
+                return;
+            }
+            randomDir = randomDir.rotateLeft();
         }
     }
 
