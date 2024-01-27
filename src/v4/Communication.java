@@ -23,8 +23,11 @@ public class Communication {
     static final int FLAG_META_OFFSET = 1;
     static final int OUR_FLAGS_START_IDX = 0;
     static final int ENEMY_FLAGS_START_IDX = OUR_FLAGS_START_IDX + GameConstants.NUMBER_FLAGS * FLAG_INFO_SIZE;
-
     static final int HOME_ENEMY_COUNTS_START_IDX = ENEMY_FLAGS_START_IDX + GameConstants.NUMBER_FLAGS * FLAG_INFO_SIZE;
+    static final int SYMMETRY_IDX = GameConstants.SHARED_ARRAY_LENGTH - 1;
+    static final int X_MASK = 0b1;
+    static final int Y_MASK = 0b10;
+    static final int ROT_MASK = 0b100;
 
     static int getFlagsStartIdx(RobotController rc, Team team) {
         return team.equals(rc.getTeam()) ? OUR_FLAGS_START_IDX : ENEMY_FLAGS_START_IDX;

@@ -18,6 +18,10 @@ public class AttackerStrategy {
             case SETUP:
                 // Move and attack randomly if no objective.
                 CrumbMicro.doScoutCrumb(rc);
+                if (flagHomes[0] != null) {
+                    Symmetry.updateSymmetries(rc, flagHomes);
+                }
+
                 MapInfo[] mapInfos = rc.senseNearbyMapInfos();
                 MapLocation closestDam = null;
                 for (MapInfo mapInfo : mapInfos) {
@@ -251,6 +255,13 @@ public class AttackerStrategy {
     static void doScout(RobotController rc, MapLocation nearestEnemyFlagLoc) throws GameActionException {
         if (nearestEnemyFlagLoc != null) {
             Pathing.moveTowards(rc, nearestEnemyFlagLoc);
+        }
+
+        Symmetry.updateSymmetries(rc, flagHomes);
+        MapLocation plausibleEnemyLoc = Symmetry.decidePlausibleLoc(rc, flagHomes);
+        if (plausibleEnemyLoc != null) {
+            Pathing.moveTowards(rc, Symmetry.decidePlausibleLoc(rc, flagHomes));
+            rc.setIndicatorLine(rc.getLocation(), Symmetry.decidePlausibleLoc(rc, flagHomes), 255, 255, 255);
         }
 
         MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();

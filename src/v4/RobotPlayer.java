@@ -84,6 +84,7 @@ public strictfp class RobotPlayer {
         flagHomeIdx = rc.getID() % GameConstants.NUMBER_FLAGS;
         ABANDON_THRESHOLD = (rc.getMapHeight() + rc.getMapWidth()) / 2;
         Pathing.BUG_MODE_TIME_LIMIT = ABANDON_THRESHOLD;
+        rc.writeSharedArray(Communication.SYMMETRY_IDX, 0b111);
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
             // loop. If we ever leave this loop and return from run(), the robot dies! At the end of the

@@ -23,6 +23,7 @@ class DefenderStrategy {
                 if (flagHomes[flagHomeIdx] != null) {
                     Pathing.doCheckedNaiveMoveTowards(rc, flagHomes[flagHomeIdx].loc);
                     TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc);
+                    Symmetry.updateSymmetries(rc, flagHomes);
                 } else {
                     TrapMicro.doSetFlagTraps(rc, rc.getLocation());
                 }
