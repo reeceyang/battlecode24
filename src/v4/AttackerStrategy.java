@@ -18,6 +18,13 @@ public class AttackerStrategy {
             case SETUP:
                 // Move and attack randomly if no objective.
                 CrumbMicro.doScoutCrumb(rc);
+                MapInfo[] mapInfos = rc.senseNearbyMapInfos();
+                for (MapInfo mapInfo : mapInfos) {
+                    if (mapInfo.isDam()) {
+                        Pathing.moveTowards(rc, mapInfo.getMapLocation());
+                        break;
+                    }
+                }
                 Pathing.doMoveRandom(rc);
                 break;
             case BATTLE:
@@ -63,10 +70,10 @@ public class AttackerStrategy {
                             Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.ESCORT;
-                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
-                            RetreatMicro.doRetreatHome(rc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.RETREAT;
+//                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
+//                            RetreatMicro.doRetreatHome(rc);
+//                            HealingMicro.doTryHeal(rc);
+//                            state = AttackerState.RETREAT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
@@ -100,10 +107,10 @@ public class AttackerStrategy {
                         } else if (enemyRobots.length != 0) {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = AttackerState.COMBAT;
-                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
-                            RetreatMicro.doRetreatHome(rc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.RETREAT;
+//                        } else if (rc.getHealth() < RETREAT_THRESHOLD) {
+//                            RetreatMicro.doRetreatHome(rc);
+//                            HealingMicro.doTryHeal(rc);
+//                            state = AttackerState.RETREAT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);

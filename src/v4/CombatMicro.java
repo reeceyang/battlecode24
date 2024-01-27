@@ -33,6 +33,10 @@ class CombatMicro {
             doTryShoot(rc); // move shoot
             return CombatResult.FIGHTING;
         }
+
+        // no nearby enemies, try to heal?
+        HealingMicro.doTryHeal(rc);
+
         if (prevEnemyLoc != null) {
             // attempt to find the enemy again
             Pathing.moveTowards(rc, prevEnemyLoc);
@@ -64,18 +68,21 @@ class CombatMicro {
     }
 
     /**
-     * Returns the next target out of an array of enemies. Prefers enemies with flags.
+     * Returns the next target out of a NONEMPTY array of enemies.
+     * Prefers enemies with flags, then lowest health enemies.
      *
      * @param enemyRobots NONEMPTY array to search through
      * @return best next target
      */
     static RobotInfo getNextTarget(RobotInfo[] enemyRobots) {
-        // pursue enemy robots with flags
+        RobotInfo lowestEnemy = enemyRobots[0];
         for (int i = 1; i < enemyRobots.length; i++) {
             if (enemyRobots[i].hasFlag()) {
                 return enemyRobots[i];
+            } else if (enemyRobots[i].getHealth() < lowestEnemy.getHealth()) {
+                lowestEnemy = enemyRobots[i];
             }
         }
-        return enemyRobots[0];
+        return lowestEnemy;
     }
 }
