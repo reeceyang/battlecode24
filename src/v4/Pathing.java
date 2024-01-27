@@ -67,7 +67,10 @@ public class Pathing {
             case BUG:
                 doBugMode(rc, target);
             case BELLMAN:
-                BellmanFord.doBellmanFord(rc, target);
+//                BellmanFord.doBellmanFord(rc, target);
+                if (!BellmanFord.doBellmanFord(rc, target)) {
+                    doBugMode(rc, target);
+                }
                 break;
         }
 //        doBugMode(rc, target);

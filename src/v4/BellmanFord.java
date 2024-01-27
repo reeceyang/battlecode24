@@ -4240,10 +4240,12 @@ if (open24) {
     MapLocation next = rc.getLocation().add(bestDir);
     if (rc.canMove(bestDir)) {
         rc.move(bestDir);
+        return true;
     } else if (rc.canFill(next)) {
         rc.fill(next);
         if (rc.canMove(bestDir)) {
             rc.move(bestDir);
+            return true;
         }
     }
     
