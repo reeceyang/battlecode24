@@ -105,7 +105,7 @@ public strictfp class RobotPlayer {
                     } else {
                         abandonCountdown = ABANDON_THRESHOLD;
                     }
-                    indicator += "h " + flagHomes[flagHomeIdx].loc + " ";
+//                    indicator += "h " + flagHomes[flagHomeIdx].loc + " ";
                     if (abandonCountdown <= 0) {
 //                        System.out.println("abandoning " + flagHomes[flagHomeIdx].loc);
                         robotType = RobotType.ATTACKER;

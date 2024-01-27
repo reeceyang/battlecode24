@@ -44,6 +44,7 @@ public class Pathing {
             closest = rc.getLocation().distanceSquaredTo(target);
             currentDirection = null;
             pathingState = PathingState.BELLMAN;
+            progressCountdown = TIME_LIMIT;
         }
 //        if (rc.getLocation().isAdjacentTo(target)) {
 //            bugMode = false;
@@ -91,7 +92,7 @@ public class Pathing {
 //                System.out.println("switched to " + pathingState);
             }
         }
-        indicator += pathingState + " ";
+        indicator += pathingState + " " + progressCountdown + " ";
     }
 
     static void doCheckedNaiveMoveTowards(RobotController rc, MapLocation loc) throws GameActionException {

@@ -6,11 +6,10 @@ import static v4.RobotPlayer.*;
 
 class RetreatMicro {
     static void doRetreatClosestSpawn(RobotController rc) throws GameActionException {
-        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-        MapLocation closestSpawnLoc = spawnLocs[0];
-        for (int i = 1; i < spawnLocs.length; i++) {
-            if (rc.getLocation().distanceSquaredTo(spawnLocs[i]) < rc.getLocation().distanceSquaredTo(closestSpawnLoc)) {
-                closestSpawnLoc = spawnLocs[i];
+        MapLocation closestSpawnLoc = flagHomes[0].loc;
+        for (int i = 1; i < flagHomes.length; i++) {
+            if (rc.getLocation().distanceSquaredTo(flagHomes[i].loc) < rc.getLocation().distanceSquaredTo(closestSpawnLoc)) {
+                closestSpawnLoc = flagHomes[0].loc;
             }
         }
         Pathing.moveTowards(rc, closestSpawnLoc);

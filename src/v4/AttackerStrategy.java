@@ -54,7 +54,7 @@ public class AttackerStrategy {
                 MapLocation nearestOurFlagEnemyHolds = Communication.getNearestFlag(rc, rc.getTeam(), FlagStatus.HELD, nearbyOurFlags);
                 MapLocation nearestDroppedEnemyFlagLoc = Communication.getNearestFlag(rc, rc.getTeam().opponent(), FlagStatus.DROPPED, nearbyEnemyFlags);
                 MapLocation mostEnemyCountHomeLoc = Communication.getMostEnemyCountHome(rc);
-                indicator += "r " + mostEnemyCountHomeLoc + " ";
+//                indicator += "r " + mostEnemyCountHomeLoc + " ";
 //                indicator += "uh " + nearestEnemyFlagWeHold + " ";
 //                indicator += "eh " + nearestOurFlagEnemyHolds + " ";
 //                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
@@ -192,6 +192,11 @@ public class AttackerStrategy {
 //                        } else if (nearestEnemyFlagWeHold != null) {
 //                            doMoveShoot(rc, nearestEnemyFlagWeHold.subtract(rc.getLocation().directionTo(nearestEnemyFlagWeHold)));
 //                            HealingMicro.doTryHeal(rc);
+                        }
+                        if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
+                            Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.ESCORT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
