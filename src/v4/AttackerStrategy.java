@@ -19,13 +19,23 @@ public class AttackerStrategy {
                 // Move and attack randomly if no objective.
                 CrumbMicro.doScoutCrumb(rc);
                 MapInfo[] mapInfos = rc.senseNearbyMapInfos();
+                MapLocation closestDam = null;
                 for (MapInfo mapInfo : mapInfos) {
-                    if (mapInfo.isDam()) {
-                        Pathing.moveTowards(rc, mapInfo.getMapLocation());
-                        break;
+                    if (mapInfo.isDam() &&
+                            (closestDam == null
+                                    || mapInfo.getMapLocation().distanceSquaredTo(rc.getLocation()) < closestDam.distanceSquaredTo(rc.getLocation()))) {
+                        closestDam = mapInfo.getMapLocation();
                     }
                 }
-                Pathing.doMoveRandom(rc);
+                if (closestDam != null) {
+                    if (!rc.getLocation().isAdjacentTo(closestDam)) {
+                        Pathing.moveTowards(rc, closestDam);
+                    }
+                } else if (rc.getRoundNum() > 150) {
+                    Pathing.moveTowards(rc, flagHomes[flagHomeIdx].loc);
+                } else {
+                    Pathing.doMoveRandom(rc);
+                }
                 break;
             case BATTLE:
                 RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
@@ -66,7 +76,7 @@ public class AttackerStrategy {
                             Pathing.moveTowards(rc, mostEnemyCountHomeLoc);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.REINFORCE;
-                        } else if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
+                        } else if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.ATTACK_RADIUS_SQUARED) {
                             Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.ESCORT;
