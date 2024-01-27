@@ -5,7 +5,7 @@ import battlecode.common.*;
 import static v4.RobotPlayer.*;
 
 enum AttackerState {
-    SCOUT, COMBAT, FLAG_SPOTTED, FLAG_HOLDING, RETREAT, ESCORT, RECAPTURE
+    SCOUT, COMBAT, FLAG_SPOTTED, FLAG_HOLDING, RETREAT, ESCORT, RECAPTURE, REINFORCE
 }
 
 public class AttackerStrategy {
@@ -39,9 +39,11 @@ public class AttackerStrategy {
                 MapLocation nearestEnemyFlagWeHold = Communication.getNearestFlag(rc, rc.getTeam().opponent(), FlagStatus.HELD, nearbyEnemyFlags);
                 MapLocation nearestOurFlagEnemyHolds = Communication.getNearestFlag(rc, rc.getTeam(), FlagStatus.HELD, nearbyOurFlags);
                 MapLocation nearestDroppedEnemyFlagLoc = Communication.getNearestFlag(rc, rc.getTeam().opponent(), FlagStatus.DROPPED, nearbyEnemyFlags);
-                indicator += "uh " + nearestEnemyFlagWeHold + " ";
-                indicator += "eh " + nearestOurFlagEnemyHolds + " ";
-                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
+                MapLocation mostEnemyCountHomeLoc = Communication.getMostEnemyCountHome(rc);
+                indicator += "r " + mostEnemyCountHomeLoc + " ";
+//                indicator += "uh " + nearestEnemyFlagWeHold + " ";
+//                indicator += "eh " + nearestOurFlagEnemyHolds + " ";
+//                indicator += "ed " + nearestDroppedEnemyFlagLoc + " ";
                 switch (state) {
                     case SCOUT:
                         if (rc.getHealth() < RETREAT_THRESHOLD) {
@@ -57,10 +59,16 @@ public class AttackerStrategy {
                             state = AttackerState.FLAG_SPOTTED;
                         } else if (nearestOurFlagEnemyHolds != null) {
                             Pathing.moveTowards(rc, nearestOurFlagEnemyHolds);
+                            HealingMicro.doTryHeal(rc);
                             state = AttackerState.RECAPTURE;
                             // TODO: prevent too many ducks from crowding the flag holder
+                        } else if (mostEnemyCountHomeLoc != null) {
+                            Pathing.moveTowards(rc, mostEnemyCountHomeLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.REINFORCE;
                         } else if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
                             Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
+                            HealingMicro.doTryHeal(rc);
                             state = AttackerState.ESCORT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
@@ -147,6 +155,19 @@ public class AttackerStrategy {
                             doMoveShoot(rc, nearestEnemyFlagWeHold.subtract(rc.getLocation().directionTo(nearestEnemyFlagWeHold)));
                             HealingMicro.doTryHeal(rc);
                             state = AttackerState.SCOUT;
+                        } else {
+                            doScout(rc, nearestDroppedEnemyFlagLoc);
+                            HealingMicro.doTryHeal(rc);
+                            state = AttackerState.SCOUT;
+                        }
+                        break;
+                    case REINFORCE:
+                        if (enemyRobots.length != 0) {
+                            CombatMicro.doCombatMicro(rc, enemyRobots);
+                            state = AttackerState.COMBAT;
+                        } else if (mostEnemyCountHomeLoc != null) {
+                            Pathing.moveTowards(rc, mostEnemyCountHomeLoc);
+                            HealingMicro.doTryHeal(rc);
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);

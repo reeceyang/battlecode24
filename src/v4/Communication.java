@@ -24,7 +24,7 @@ public class Communication {
     static final int OUR_FLAGS_START_IDX = 0;
     static final int ENEMY_FLAGS_START_IDX = OUR_FLAGS_START_IDX + GameConstants.NUMBER_FLAGS * FLAG_INFO_SIZE;
 
-    static final int HOME_DEFENDER_IDX = ENEMY_FLAGS_START_IDX + GameConstants.NUMBER_FLAGS * FLAG_INFO_SIZE;
+    static final int HOME_ENEMY_COUNTS_START_IDX = ENEMY_FLAGS_START_IDX + GameConstants.NUMBER_FLAGS * FLAG_INFO_SIZE;
 
     static int getFlagsStartIdx(RobotController rc, Team team) {
         return team.equals(rc.getTeam()) ? OUR_FLAGS_START_IDX : ENEMY_FLAGS_START_IDX;
@@ -181,12 +181,27 @@ public class Communication {
         return FlagStatus.UNKNOWN;
     }
 
-    static void setFoundHomeDefender(RobotController rc, int homeFlagIdx) throws GameActionException {
-        int old = rc.readSharedArray(HOME_DEFENDER_IDX);
-        rc.writeSharedArray(HOME_DEFENDER_IDX, old | (1 << homeFlagIdx));
+    static void reportHomeEnemyCount(RobotController rc, int flagIdx, int numEnemies) throws GameActionException {
+        rc.writeSharedArray(HOME_ENEMY_COUNTS_START_IDX + flagIdx, numEnemies);
     }
 
-    static boolean getHasFoundHomeDefender(RobotController rc, int homeFlagIdx) throws GameActionException {
-        return (rc.readSharedArray(HOME_DEFENDER_IDX) & (1 << homeFlagIdx)) == 1;
+    static MapLocation getMostEnemyCountHome(RobotController rc) throws GameActionException {
+        MapLocation loc = null;
+        int mostEnemyCount = 0;
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
+            int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
+            if (enemyCount > mostEnemyCount) {
+                mostEnemyCount = enemyCount;
+                loc = flagHomes[i].loc;
+            }
+        }
+        return loc;
+    }
+
+    static void printHomeEnemyCounts(RobotController rc) throws GameActionException {
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
+            int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
+            System.out.println(flagHomes[i].loc + " " + enemyCount);
+        }
     }
 }

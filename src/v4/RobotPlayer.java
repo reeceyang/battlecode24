@@ -80,7 +80,6 @@ public strictfp class RobotPlayer {
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
         rng = new Random(rc.getID());
-//        robotType = rc.getID() % 8 == 1 ? RobotType.DEFENDER : RobotType.ATTACKER;
         Pathing.leftHanded = rc.getID() % 2 == 0;
         flagHomeIdx = rc.getID() % GameConstants.NUMBER_FLAGS;
 
@@ -92,6 +91,8 @@ public strictfp class RobotPlayer {
 
             // Try/catch blocks stop unhandled exceptions, which cause your robot to explode.
             try {
+                // NOTE: we have macro state that needs to be handled before spawning
+                // There is more macro state handling after spawning
                 if (rc.getRoundNum() >= GameConstants.SETUP_ROUNDS) {
                     // Battle
                     macroState = MacroState.BATTLE;
@@ -164,6 +165,12 @@ public strictfp class RobotPlayer {
                             }
                             break;
                         case BATTLE:
+                            int numEnemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length;
+                            for (FlagHome flagHome : flagHomes) {
+                                if (flagHome.loc.distanceSquaredTo(rc.getLocation()) <= GameConstants.INTERACT_RADIUS_SQUARED) {
+                                    Communication.reportHomeEnemyCount(rc, flagHomeIdx, numEnemies);
+                                }
+                            }
                             break;
                     }
 //                    Communication.printFlagInfo(rc);
