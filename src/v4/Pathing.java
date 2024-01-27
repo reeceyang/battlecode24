@@ -5,8 +5,11 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
-import static v4.RobotPlayer.directions;
-import static v4.RobotPlayer.rng;
+import static v4.RobotPlayer.*;
+
+enum PathingState {
+    BUG, BELLMAN
+}
 
 public class Pathing {
 
@@ -24,7 +27,7 @@ public class Pathing {
     static MapLocation currentTarget = null;
     static int progressCountdown = TIME_LIMIT;
     static int closest = Integer.MAX_VALUE;
-    static boolean bugMode = false;
+    static PathingState pathingState = PathingState.BELLMAN;
 
     static void moveTowards(RobotController rc, MapLocation target) throws GameActionException {
         currentTarget = target;
@@ -40,6 +43,7 @@ public class Pathing {
             previousTarget = target;
             closest = rc.getLocation().distanceSquaredTo(target);
             currentDirection = null;
+            pathingState = PathingState.BELLMAN;
         }
 //        if (rc.getLocation().isAdjacentTo(target)) {
 //            bugMode = false;
@@ -58,19 +62,36 @@ public class Pathing {
 //            }
 //			rc.setIndicatorString("bellman ford used " + (bytecodesLeft - Clock.getBytecodesLeft()));
 //        } else {
-        doBugMode(rc, target);
+        switch (pathingState) {
+
+            case BUG:
+                doBugMode(rc, target);
+            case BELLMAN:
+                BellmanFord.doBellmanFord(rc, target);
+                break;
+        }
+//        doBugMode(rc, target);
 //        rc.setIndicatorString("bugmode" + bugMode + " " + progressCountdown + " " + target + "left" + leftHanded + currentDirection + closest + " " + rc.getLocation().distanceSquaredTo(target));
         int currentDistance = rc.getLocation().distanceSquaredTo(target);
         if (currentDistance < closest) {
             closest = currentDistance;
+        } else {
+            progressCountdown--;
+            if (progressCountdown <= 0) {
+                switch (pathingState) {
+                    case BUG:
+                        pathingState = PathingState.BELLMAN;
+                        progressCountdown = TIME_LIMIT;
+                        break;
+                    case BELLMAN:
+                        pathingState = PathingState.BUG;
+                        progressCountdown = BUG_MODE_TIME_LIMIT;
+                        break;
+                }
+//                System.out.println("switched to " + pathingState);
+            }
         }
-//        } else {
-//            progressCountdown--;
-//            if (progressCountdown <= 0) {
-//                bugMode = !bugMode;
-//                progressCountdown = bugMode ? BUG_MODE_TIME_LIMIT : TIME_LIMIT;
-//            }
-//        }
+        indicator += pathingState + " ";
     }
 
     static void doCheckedNaiveMoveTowards(RobotController rc, MapLocation loc) throws GameActionException {
