@@ -22,7 +22,7 @@ class DefenderStrategy {
 //                    TrapMicro.doSetFlagTraps(rc, rc.senseNearbyFlags(-1)[0].getLocation());
 //                }
                 if (flagHomes[flagHomeIdx] != null) {
-                    Pathing.moveTowards(rc, flagHomes[flagHomeIdx].loc);
+                    Pathing.doCheckedNaiveMoveTowards(rc, flagHomes[flagHomeIdx].loc);
                     TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc);
                 } else {
                     TrapMicro.doSetFlagTraps(rc, rc.getLocation());
@@ -50,22 +50,20 @@ class DefenderStrategy {
                 switch (state) {
                     case PATROL:
                         if (enemyRobots.length != 0) {
-                            CombatMicro.doCombatMicro(rc, enemyRobots);
-                            state = DefenderState.COMBAT;
-                        } else {
-//                            MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-//                            Pathing.moveTowards(rc, spawnLocs[rng.nextInt(spawnLocs.length)]);
-                            if (rc.getLocation().distanceSquaredTo(flagHomes[flagHomeIdx].loc) >= GameConstants.ATTACK_RADIUS_SQUARED) {
-                                RetreatMicro.doRetreatHome(rc);
-                            } else {
-                                // Move randomly if no objective.
-                                if (rc.canMove(randomDir)) {
-                                    rc.move(randomDir);
-                                }
-                            }
-                            HealingMicro.doTryHeal(rc);
-                            TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc); // TODO: this moves at the end, avoid
+//                            state = DefenderState.COMBAT;
                         }
+                        CombatMicro.doTryShoot(rc);
+                        if (rc.getLocation().distanceSquaredTo(flagHomes[flagHomeIdx].loc) >= GameConstants.INTERACT_RADIUS_SQUARED) {
+                            Pathing.doCheckedNaiveMoveTowards(rc, flagHomes[flagHomeIdx].loc);
+                        } else {
+                            // Move randomly if no objective.
+                            if (rc.canMove(randomDir)) {
+                                rc.move(randomDir);
+                            }
+                        }
+                        HealingMicro.doTryHeal(rc);
+                        TrapMicro.doSetFlagTraps(rc, flagHomes[flagHomeIdx].loc); // TODO: this moves at the end, avoid
+                        TrapMicro.doSetFlagTraps(rc, rc.getLocation()); // TODO: this moves at the end, avoid
                         break;
                     case COMBAT:
                         switch (CombatMicro.doCombatMicro(rc, enemyRobots)) {

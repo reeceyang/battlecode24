@@ -70,6 +70,13 @@ public class Pathing {
 //        }
     }
 
+    static void doCheckedNaiveMoveTowards(RobotController rc, MapLocation loc) throws GameActionException {
+        Direction d = rc.getLocation().directionTo(loc);
+        if (rc.canMove(d)) {
+            rc.move(d);
+        }
+    }
+
     static void doBeeline(RobotController rc, Direction d) throws GameActionException {
         if (rc.canMove(d)) {
             rc.move(d);

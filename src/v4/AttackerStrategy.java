@@ -59,9 +59,9 @@ public class AttackerStrategy {
                             Pathing.moveTowards(rc, nearestOurFlagEnemyHolds);
                             state = AttackerState.RECAPTURE;
                             // TODO: prevent too many ducks from crowding the flag holder
-//                        } else if (nearestEnemyFlagWeHold != null) {
-//                            Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
-//                            state = AttackerState.ESCORT;
+                        } else if (nearestEnemyFlagWeHold != null && nearestEnemyFlagWeHold.distanceSquaredTo(rc.getLocation()) > GameConstants.VISION_RADIUS_SQUARED) {
+                            Pathing.moveTowards(rc, nearestEnemyFlagWeHold);
+                            state = AttackerState.ESCORT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
@@ -144,8 +144,9 @@ public class AttackerStrategy {
                             CombatMicro.doCombatMicro(rc, enemyRobots);
                             state = AttackerState.COMBAT;
                         } else if (nearestEnemyFlagWeHold != null) {
-                            doMoveShoot(rc, nearestEnemyFlagWeHold);
+                            doMoveShoot(rc, nearestEnemyFlagWeHold.subtract(rc.getLocation().directionTo(nearestEnemyFlagWeHold)));
                             HealingMicro.doTryHeal(rc);
+                            state = AttackerState.SCOUT;
                         } else {
                             doScout(rc, nearestDroppedEnemyFlagLoc);
                             HealingMicro.doTryHeal(rc);
