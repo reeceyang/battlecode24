@@ -126,8 +126,19 @@ public strictfp class RobotPlayer {
 
                 // Make sure you spawn your robot in before you attempt to take any actions!
                 // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
+                MapLocation mostEnemyCountHome = Communication.getMostEnemyCountHome(rc);
+                if (!rc.isSpawned() && robotType == RobotType.ATTACKER && mostEnemyCountHome != null) {
+                    // Try to spawn at home with most enemies
+                    for (Direction dir : Direction.allDirections()) {
+                        MapLocation loc = mostEnemyCountHome.add(dir);
+                        if (rc.canSpawn(loc)) {
+                            rc.spawn(loc);
+                            break;
+                        }
+                    }
+                }
                 if (!rc.isSpawned() && flagHomes[flagHomeIdx] != null) {
-                    // Try to spawn at home first.
+                    // Try to spawn at home.
                     for (Direction dir : Direction.allDirections()) {
                         MapLocation loc = flagHomes[flagHomeIdx].loc.add(dir);
                         if (rc.canSpawn(loc)) {
@@ -167,7 +178,8 @@ public strictfp class RobotPlayer {
                         case BATTLE:
                             int numEnemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length;
                             for (FlagHome flagHome : flagHomes) {
-                                if (flagHome.loc.distanceSquaredTo(rc.getLocation()) <= GameConstants.INTERACT_RADIUS_SQUARED) {
+                                int distanceSquaredTo = flagHome.loc.distanceSquaredTo(rc.getLocation());
+                                if (distanceSquaredTo <= GameConstants.ATTACK_RADIUS_SQUARED) {
                                     Communication.reportHomeEnemyCount(rc, flagHomeIdx, numEnemies);
                                 }
                             }
