@@ -1,4 +1,4 @@
-package v4;
+package v5;
 
 import battlecode.common.*;
 
@@ -189,7 +189,7 @@ public strictfp class RobotPlayer {
                                         break;
                                     }
                                 }
-//                                System.out.println("Assigned defender at " + flagHomes[flagHomeIdx].loc);
+                                System.out.println("Assigned defender at " + flagHomes[flagHomeIdx].loc);
                             }
                             break;
                         case BATTLE:
