@@ -21,6 +21,7 @@ public class AttackerStrategy {
                 CrumbMicro.doScoutCrumb(rc);
                 if (flagHomes[0] != null) {
                     Symmetry.updateSymmetries(rc, flagHomes);
+                    Pathing.moveTowards(rc, Symmetry.decidePlausibleLoc(rc, flagHomes));
                 }
 
                 MapInfo[] mapInfos = rc.senseNearbyMapInfos();
