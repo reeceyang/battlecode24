@@ -252,18 +252,31 @@ public class AttackerStrategy {
         }
 
         Symmetry.updateSymmetries(rc, flagHomes);
-        MapLocation plausibleEnemyLoc = Symmetry.decidePlausibleLoc(rc, flagHomes);
-        if (plausibleEnemyLoc != null) {
-            Pathing.moveTowards(rc, plausibleEnemyLoc);
-//            rc.setIndicatorLine(rc.getLocation(), plausibleEnemyLoc, 255, 255, 255);
-            scoutTarget = plausibleEnemyLoc;
-            return;
-        }
+        MapLocation[] plausibleEnemyLocs = Symmetry.getPlausibleLocs(rc, flagHomes);
 
         MapLocation[] broadcastFlagLocs = rc.senseBroadcastFlagLocations();
+        boolean foundBroadcastMatch = false;
+        for (MapLocation plausibleEnemyLoc : plausibleEnemyLocs) {
+            if (plausibleEnemyLoc != null) {
+                for (MapLocation broadcastFlagLoc : broadcastFlagLocs) {
+                    if (broadcastFlagLoc.isWithinDistanceSquared(plausibleEnemyLoc, GameConstants.FLAG_BROADCAST_NOISE_RADIUS)) {
+                        foundBroadcastMatch = true;
+                        break;
+                    }
+                }
+                if (foundBroadcastMatch) {
+                    Pathing.moveTowards(rc, plausibleEnemyLoc);
+                    scoutTarget = plausibleEnemyLoc;
+                    rc.setIndicatorLine(scoutTarget, rc.getLocation(), 0, 255, 0);
+                    return;
+                }
+            }
+        }
+
         if (broadcastFlagLocs.length != 0) {
             Pathing.moveTowards(rc, broadcastFlagLocs[0]);
             scoutTarget = broadcastFlagLocs[0];
+            rc.setIndicatorLine(scoutTarget, rc.getLocation(), 255, 0, 0);
             return;
         }
 

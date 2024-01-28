@@ -40,7 +40,7 @@ public class Symmetry {
                 continue;
             }
             MapLocation symmFlagLoc = findSymmetricLoc(rc, flagHome.loc, s);
-            rc.setIndicatorDot(symmFlagLoc, ((s == MapSymmetry.X) ? 1 : 0) * 255, ((s == MapSymmetry.Y) ? 1 : 0) * 255, ((s == MapSymmetry.ROT) ? 1 : 0) * 255);
+//            rc.setIndicatorDot(symmFlagLoc, ((s == MapSymmetry.X) ? 1 : 0) * 255, ((s == MapSymmetry.Y) ? 1 : 0) * 255, ((s == MapSymmetry.ROT) ? 1 : 0) * 255);
             if (symmFlagLoc.isWithinDistanceSquared(currLoc, GameConstants.VISION_RADIUS_SQUARED)) {
                 MapInfo symmInfo = rc.senseMapInfo(symmFlagLoc);
                 if (!symmInfo.isSpawnZone()) {

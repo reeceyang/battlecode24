@@ -212,7 +212,7 @@ public strictfp class RobotPlayer {
                             break;
                     }
                     if (Pathing.currentTarget != null) {
-                        rc.setIndicatorLine(rc.getLocation(), Pathing.currentTarget, 255, 255, 255);
+                        rc.setIndicatorLine(rc.getLocation(), Pathing.currentTarget, 0, 0, 0);
                     }
                 }
                 rc.setIndicatorString(indicator);

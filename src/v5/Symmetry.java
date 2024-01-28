@@ -92,6 +92,18 @@ public class Symmetry {
         return null;
     }
 
+    static MapLocation[] getPlausibleLocs(RobotController rc, FlagHome[] flagHomes) throws GameActionException {
+        MapLocation[] plausibleLocs = {null, null, null};
+        for (MapSymmetry s : new MapSymmetry[]{MapSymmetry.X, MapSymmetry.Y, MapSymmetry.ROT}) {
+            if (isSymmetryPossible(rc, s)) {
+                for (int i = 0; i < 3; i++) {
+                    plausibleLocs[i] = findSymmetricLoc(rc, flagHomes[i].loc, s);
+                }
+            }
+        }
+        return plausibleLocs;
+    }
+
     // Compare other team's flags' broadcasted location to locations of 3 known flags to determine presence/absence of symmetry
     static boolean checkEnemyFlags(RobotController rc, MapSymmetry s, FlagHome[] flagHomes) throws GameActionException {
         MapLocation[] approxEnemyFlagLocs = rc.senseBroadcastFlagLocations();
@@ -115,13 +127,13 @@ public class Symmetry {
         MapLocation newLoc = null;
         switch (s) {
             case Y:
-                newLoc = new MapLocation(loc.x, h - loc.y);
+                newLoc = new MapLocation(loc.x, h - loc.y - 1);
                 break;
             case X:
-                newLoc = new MapLocation(w - loc.x, loc.y);
+                newLoc = new MapLocation(w - loc.x - 1, loc.y);
                 break;
             case ROT:
-                newLoc = new MapLocation(w - loc.x, h - loc.y);
+                newLoc = new MapLocation(w - loc.x - 1, h - loc.y - 1);
                 break;
         }
         return newLoc;

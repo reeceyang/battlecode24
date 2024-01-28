@@ -11,7 +11,7 @@ class RetreatMicro {
         MapLocation closestSpawnLoc = flagHomes[0].loc;
         for (int i = 1; i < flagHomes.length; i++) {
             if (rc.getLocation().distanceSquaredTo(flagHomes[i].loc) < rc.getLocation().distanceSquaredTo(closestSpawnLoc)) {
-                closestSpawnLoc = flagHomes[0].loc;
+                closestSpawnLoc = flagHomes[i].loc;
             }
         }
         Pathing.moveTowards(rc, closestSpawnLoc);

@@ -135,6 +135,7 @@ public strictfp class RobotPlayer {
                         MapLocation loc = mostEnemyCountHome.add(dir);
                         if (rc.canSpawn(loc)) {
                             rc.spawn(loc);
+//                            System.out.println("spawned at most enemy home " + loc);
                             break;
                         }
                     }
@@ -151,6 +152,7 @@ public strictfp class RobotPlayer {
                         }
                     }
                     if (closestLoc != null) {
+//                        System.out.println("spawned at closest to scout target " + closestLoc);
                         rc.spawn(closestLoc);
                     }
                 }
@@ -159,6 +161,7 @@ public strictfp class RobotPlayer {
                     for (Direction dir : Direction.allDirections()) {
                         MapLocation loc = flagHomes[flagHomeIdx].loc.add(dir);
                         if (rc.canSpawn(loc)) {
+//                            System.out.println("spawned at home " + loc);
                             rc.spawn(loc);
                             break;
                         }
@@ -169,6 +172,7 @@ public strictfp class RobotPlayer {
                     // Pick the first possible spawn location
                     for (MapLocation loc : spawnLocs) {
                         if (rc.canSpawn(loc)) {
+//                            System.out.println("spawned at random " + loc);
                             rc.spawn(loc);
                             break;
                         }
@@ -222,7 +226,6 @@ public strictfp class RobotPlayer {
                 // world. Remember, uncaught exceptions cause your robot to explode!
                 System.out.println("GameActionException");
                 e.printStackTrace();
-
             } catch (Exception e) {
                 // Oh no! It looks like our code tried to do something bad. This isn't a
                 // GameActionException, so it's more likely to be a bug in our code.
