@@ -169,11 +169,26 @@ public class AttackerStrategy {
                         if (nearestOurFlagEnemyHolds != null) {
                             doMoveShoot(rc, nearestOurFlagEnemyHolds);
                             HealingMicro.doTryHeal(rc);
-                        } else {
-                            doScout(rc, nearestDroppedEnemyFlagLoc);
-                            HealingMicro.doTryHeal(rc);
-                            state = AttackerState.SCOUT;
+                        } else if (nearbyOurFlags.length > 0) {
+                            boolean needToGuard = false;
+                            for (FlagInfo flagInfo : nearbyOurFlags) {
+                                if (flagInfo.getLocation().isWithinDistanceSquared(flagHomes[0].loc, GameConstants.INTERACT_RADIUS_SQUARED)
+                                        && flagInfo.getLocation().isWithinDistanceSquared(flagHomes[1].loc, GameConstants.INTERACT_RADIUS_SQUARED)
+                                        && flagInfo.getLocation().isWithinDistanceSquared(flagHomes[2].loc, GameConstants.INTERACT_RADIUS_SQUARED)
+                                ) {
+                                    doMoveShoot(rc, flagInfo.getLocation());
+                                    HealingMicro.doTryHeal(rc);
+                                    needToGuard = true;
+                                    break;
+                                }
+                            }
+                            if (needToGuard) {
+                                break;
+                            }
                         }
+                        doScout(rc, nearestDroppedEnemyFlagLoc);
+                        HealingMicro.doTryHeal(rc);
+                        state = AttackerState.SCOUT;
                         break;
                     case ESCORT:
                         if (rc.canPickupFlag(rc.getLocation())) {

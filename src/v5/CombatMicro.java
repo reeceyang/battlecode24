@@ -20,10 +20,14 @@ class CombatMicro {
                 enemy = getNextTarget(enemyRobots);
             }
             prevEnemyLoc = enemy.getLocation();
+            if (AttackerStrategy.state == AttackerState.REINFORCE || AttackerStrategy.state == AttackerState.RECAPTURE) {
+
+            }
             // if we can attack the next turn and we have enough health
-            if (rc.getActionCooldownTurns() <= 1 //&& rc.getHealth() > RobotPlayer.RETREAT_THRESHOLD
+            else if (rc.getActionCooldownTurns() <= 1 //&& rc.getHealth() > RobotPlayer.RETREAT_THRESHOLD
                     // pursue enemies with flags or outside action radius
-                    && (enemy.hasFlag() || rc.getLocation().distanceSquaredTo(enemy.getLocation()) > GameConstants.ATTACK_RADIUS_SQUARED)
+                    && (enemy.hasFlag()
+                    || rc.getLocation().distanceSquaredTo(enemy.getLocation()) > GameConstants.ATTACK_RADIUS_SQUARED)
             ) {
                 Pathing.moveTowards(rc, enemy.getLocation());
             } else if (ourRobots.length > 0) {
