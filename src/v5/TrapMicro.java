@@ -11,6 +11,14 @@ public class TrapMicro {
 //        return TrapType.STUN;
     }
 
+    static void doSetBudgetedTrap(RobotController rc) throws GameActionException {
+        if (RobotPlayer.macroState == MacroState.BATTLE) {
+            if (rc.canBuild(TrapType.STUN, rc.getLocation())) {
+                rc.build(TrapType.STUN, rc.getLocation());
+            }
+        }
+    }
+
     static void doSetFlagTraps(RobotController rc, MapLocation flagLoc) throws GameActionException {
         TrapType flagTrap = decideTrap(rc);
         for (Direction dir : Direction.allDirections()) {

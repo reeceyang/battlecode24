@@ -191,7 +191,7 @@ public class Communication {
         rc.writeSharedArray(HOME_ENEMY_COUNTS_START_IDX + flagIdx, numEnemies);
     }
 
-    static MapLocation getMostEnemyCountHome(RobotController rc) throws GameActionException {
+    static MapLocation getMostEnemyCountHomeForSpawning(RobotController rc) throws GameActionException {
         MapLocation loc = null;
         int mostEnemyCount = 0;
         for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
@@ -201,6 +201,25 @@ public class Communication {
 //            if (readBitPackedFlagStatus(bitPackedMeta) == FlagStatus.UNKNOWN) {
 //                continue;
 //            }
+            int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
+            if (enemyCount > mostEnemyCount) {
+                mostEnemyCount = enemyCount;
+                loc = flagHomes[i].loc;
+            }
+        }
+        return loc;
+    }
+
+    static MapLocation getMostEnemyCountHomeForAttacker(RobotController rc) throws GameActionException {
+        MapLocation loc = null;
+        int mostEnemyCount = 0;
+        for (int i = 0; i < GameConstants.NUMBER_FLAGS; i++) {
+            int metaIdx = OUR_FLAGS_START_IDX + i * FLAG_INFO_SIZE + FLAG_META_OFFSET;
+            int bitPackedMeta = rc.readSharedArray(metaIdx);
+            // Don't reinforce a flag of an unknown status
+            if (readBitPackedFlagStatus(bitPackedMeta) == FlagStatus.UNKNOWN) {
+                continue;
+            }
             int enemyCount = rc.readSharedArray(HOME_ENEMY_COUNTS_START_IDX + i);
             if (enemyCount > mostEnemyCount) {
                 mostEnemyCount = enemyCount;

@@ -94,6 +94,7 @@ public class Pathing {
 //                System.out.println("switched to " + pathingState);
             }
         }
+        CombatMicro.doTryShoot(rc);
         indicator += pathingState + " " + progressCountdown + " ";
     }
 

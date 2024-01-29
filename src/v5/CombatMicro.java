@@ -20,7 +20,7 @@ class CombatMicro {
                 enemy = getNextTarget(enemyRobots);
             }
             prevEnemyLoc = enemy.getLocation();
-            if (AttackerStrategy.state == AttackerState.REINFORCE || AttackerStrategy.state == AttackerState.RECAPTURE) {
+            if (!RobotPlayer.BE_SAFER || AttackerStrategy.state == AttackerState.REINFORCE || AttackerStrategy.state == AttackerState.RECAPTURE) {
 
             }
             // if we can attack the next turn and we have enough health

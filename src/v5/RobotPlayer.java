@@ -69,6 +69,7 @@ public strictfp class RobotPlayer {
     static String indicator;
     static FlagHome[] flagHomes = new FlagHome[GameConstants.NUMBER_FLAGS];
     static int flagHomeIdx;
+    static boolean BE_SAFER = false;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -120,6 +121,10 @@ public strictfp class RobotPlayer {
                     }
                 }
 
+                if (rc.getRoundNum() >= 500) {
+                    BE_SAFER = true;
+                }
+
                 for (GlobalUpgrade globalUpgrade : GLOBAL_UPGRADES) {
                     if (rc.canBuyGlobal(globalUpgrade)) {
                         rc.buyGlobal(globalUpgrade);
@@ -128,7 +133,7 @@ public strictfp class RobotPlayer {
 
                 // Make sure you spawn your robot in before you attempt to take any actions!
                 // Robots not spawned in do not have vision of any tiles and cannot perform any actions.
-                MapLocation mostEnemyCountHome = Communication.getMostEnemyCountHome(rc);
+                MapLocation mostEnemyCountHome = Communication.getMostEnemyCountHomeForSpawning(rc);
                 if (!rc.isSpawned() && robotType == RobotType.ATTACKER && mostEnemyCountHome != null) {
                     // Try to spawn at home with most enemies
                     for (Direction dir : Direction.allDirections()) {
